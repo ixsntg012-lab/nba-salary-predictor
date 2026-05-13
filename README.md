@@ -1,12 +1,13 @@
-# AI Mock Interview System 🎤
+# NBA Player Salary Predictor 🏀
 
 <div align="center">
 
-**AI-powered interview practice platform — role-specific questions, instant feedback, detailed scoring**
+**Predicts NBA player salaries from performance statistics using ML regression — with an interactive Streamlit dashboard**
 
 ![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-Web_App-000000?style=for-the-badge&logo=flask)
-![Gemini](https://img.shields.io/badge/Google_Gemini-AI_Powered-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-Boosting-189C1A?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 </div>
@@ -15,18 +16,22 @@
 
 ## What It Does
 
-1. Enter your **name**, **job role**, and **experience level**
-2. Gemini AI generates **5 role-specific questions** (technical + behavioral mix)
-3. Answer each question in your own words
-4. AI evaluates instantly and gives:
-   - **Score** (0–10)
-   - **Detailed feedback** (2–3 sentences)
-   - **Strengths** in your answer
-   - **Areas to improve**
-   - **Sample strong answer** hint
-5. **Final scorecard** — overall percentage + verdict
+Enter any NBA player's per-game statistics and the system predicts their market salary in real time using a trained ML regression model. The interactive Streamlit dashboard lets you adjust sliders for points, assists, rebounds, and more — and instantly see the predicted salary tier.
 
-> **Problem:** Most job seekers practice interviews without feedback. Hiring coaches are expensive. This system gives honest, instant, AI-generated feedback on every answer — 24/7, free.
+> **Best model:** Ridge Regression — **RMSE: $2.50M** on 2022–2024 NBA season data
+
+---
+
+## Results
+
+| Model | RMSE (lower = better) |
+|-------|----------------------|
+| **Ridge Regression** ✅ | **$2.50M** |
+| Random Forest | $2.98M |
+| XGBoost | $2.87M |
+| SVR | $3.35M |
+
+**Key finding:** PTS (points per game) dominates salary prediction — importance score of 0.85+ in Random Forest. Secondary factors: AST, PER, TRB.
 
 ---
 
@@ -34,42 +39,60 @@
 
 | Feature | Description |
 |---------|-------------|
-| Dynamic question generation | Gemini generates fresh questions for any job role |
-| Real-time answer evaluation | Each answer scored and analyzed instantly |
-| Strengths + improvements | Specific, actionable feedback per answer |
-| Sample answer hint | AI shows what a strong answer includes |
-| Final scorecard | Overall percentage + verdict (Strong / Needs Improvement / Keep Practicing) |
-| Any job role | SWE, ML Engineer, Data Scientist, PM, and more |
-| Clean dark UI | Progress bar, mobile-friendly, no external CSS frameworks |
+| 4-model comparison | Ridge Regression, Random Forest, XGBoost, SVR — auto-selects best |
+| Real web scraping | Data scraped from Basketball-Reference.com (2022–2024 seasons) |
+| Feature engineering | PER, TS%, GS ratio, age-prime factor, pts/min |
+| Interactive dashboard | Streamlit sliders for real-time prediction |
+| Salary tier classification | Superstar / All-Star / Starter / Rotation / Minimum |
+| Visualization | Model comparison, actual vs predicted, feature importance, salary distribution |
 
 ---
 
-## How It Works
+## ML Pipeline
 
 ```
-User Input (name + role + experience level)
+Basketball-Reference.com
         │
         ▼
-Gemini API — Generate 5 role-specific questions
-(technical + behavioral mix, numbered list)
+Web Scraping (BeautifulSoup + requests)
+Per-game stats + salaries for 2022, 2023, 2024 seasons
         │
         ▼
-User answers each question
+Feature Engineering
+  Raw: PTS, AST, TRB, STL, BLK, TOV, FG%, 3P%, FT%, Age, G, MP
+  Engineered: PER, TS%, GS_ratio, age_prime (|age-27|), pts_per_min
+  Encoded: Position (PG=0, SG=1, SF=2, PF=3, C=4)
         │
         ▼
-Gemini API — Evaluate answer → structured JSON response
-  {
-    "score": 0-10,
-    "feedback": "2-3 sentence analysis",
-    "strengths": ["point 1", "point 2"],
-    "improvements": ["point 1", "point 2"],
-    "sample": "what a strong answer includes"
-  }
+Train 4 Regression Models (80/20 split, stratified)
+StandardScaler applied for Ridge + SVR
         │
         ▼
-Final Results Page
-  total score / max score → percentage → verdict
+Auto-select best model by RMSE
+Save model.pkl + scaler.pkl + features.pkl
+        │
+        ▼
+Streamlit Dashboard
+  → Sidebar sliders for player stats input
+  → Real-time salary prediction
+  → Salary tier label
+  → Performance visualizations
 ```
+
+---
+
+## Features Used
+
+**Raw stats:** PTS, AST, TRB, STL, BLK, TOV, FG%, 3P%, FT%, Age, G, GS, MP
+
+**Engineered features:**
+| Feature | Formula | Purpose |
+|---------|---------|---------|
+| PER | (PTS + TRB + AST + STL + BLK - TOV) / MP | Overall efficiency |
+| TS% | PTS / (2 × estimated possessions) | True shooting efficiency |
+| GS_ratio | GS / G | Starter reliability |
+| age_prime | \|Age - 27\| | Distance from peak age |
+| pts_per_min | PTS / MP | Scoring efficiency per minute |
 
 ---
 
@@ -77,53 +100,55 @@ Final Results Page
 
 | Component | Technology |
 |-----------|-----------|
-| AI / LLM | Google Gemini API |
-| Backend | Python + Flask |
-| Frontend | HTML + CSS (no external frameworks) |
-| Session Management | UUID-based JSON file storage (avoids cookie size limits) |
+| Data Collection | requests + BeautifulSoup (web scraping) |
+| Data Processing | Pandas, NumPy |
+| ML Models | Scikit-learn (Ridge, Random Forest, SVR), XGBoost |
+| Visualization | Matplotlib, Seaborn |
+| Dashboard | Streamlit |
+| Model Storage | Joblib |
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/ixsntg012-lab/AI-Mock-Interview.git
-cd AI-Mock-Interview
+git clone https://github.com/ixsntg012-lab/nba-salary-predictor.git
+cd nba-salary-predictor
 pip install -r requirements.txt
 ```
-
-Add your Gemini API key in `app.py`:
-```python
-GEMINI_API_KEY = "your_key_here"
-```
-
-Get a free key at: [aistudio.google.com](https://aistudio.google.com)
 
 ---
 
 ## Usage
 
 ```bash
-python app.py
-```
+# Step 1 — Scrape data
+python scrape_data.py
 
-Open browser: `http://localhost:5000`
+# Step 2 — Train models
+python models/train_models.py
+
+# Step 3 — Launch dashboard
+streamlit run dashboard/app.py
+```
 
 ---
 
 ## Project Structure
 
 ```
-AI-Mock-Interview/
-│
-├── templates/
-│   ├── index.html        ← Home (role + experience input)
-│   ├── interview.html    ← Question display
-│   ├── feedback.html     ← Answer evaluation + feedback
-│   └── results.html      ← Final scorecard
-│
-├── interview_data/       ← Session JSON files (auto-created, gitignored)
-├── app.py                ← Flask application + Gemini integration
+nba-salary-predictor/
+├── data/
+│   ├── scrape_data.py       ← Web scraping (Basketball-Reference)
+│   └── nba_data.csv         ← Generated after scraping
+├── models/
+│   ├── train_models.py      ← Train + compare 4 models
+│   ├── best_model.pkl       ← Saved best model
+│   ├── scaler.pkl           ← Saved StandardScaler
+│   └── features.pkl         ← Feature list
+├── dashboard/
+│   └── app.py               ← Streamlit dashboard
+├── plots/                   ← Auto-generated visualizations
 ├── requirements.txt
 └── README.md
 ```
@@ -132,31 +157,23 @@ AI-Mock-Interview/
 
 ## Limitations & Future Work
 
-**Phase 1 — Enhanced Evaluation**
-- STAR method scoring — check if answer follows Situation, Task, Action, Result
-- Domain-specific rubrics for technical vs behavioral questions
-- AI follow-up questions based on your answer
+- Salary prediction is inherently noisy — player market value depends on team needs, contract years, and negotiation, not just stats
+- Model trained on 3 seasons (2022–2024) — more historical data would improve generalization
+- Future: add injury history, contract years remaining, and team salary cap space as features
+- Future: deploy on Streamlit Cloud for public access
 
-**Phase 2 — Voice & Video**
-- Speech-to-text input — answer by speaking
-- Filler word detection ("um", "like", "you know")
-- Webcam mode for body language awareness
+---
 
-**Phase 3 — Personalization**
-- User accounts — save history and track improvement over time
-- Resume-based questions — upload resume → AI generates questions from your experience
-- Company-specific modes (FAANG style, startup style)
+## Data Source
 
-**Phase 4 — Deployment**
-- Cloud deployment on Render / Railway
-- Multi-language support
+Stats and salary data scraped from [Basketball-Reference.com](https://www.basketball-reference.com) — 2022, 2023, 2024 NBA seasons.
 
 ---
 
 ## Author
 
 **Swetha Kiran Veernapu**
-MS Computer Science
+MS Computer Science | CAP 5937 Final Project
 
 ---
 
