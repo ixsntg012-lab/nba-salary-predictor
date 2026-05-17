@@ -1,108 +1,182 @@
-# 🏀 NBA Player Salary Predictor
-### CAP 5937 — Final Project | Spring 2026
+# NBA Player Salary Predictor 🏀
 
-Predicts NBA player salaries using performance statistics scraped from Basketball-Reference.com.  
-Compares 4 ML regression models and serves predictions via an interactive Streamlit dashboard.
+<div align="center">
+
+**Predicts NBA player salaries from performance statistics using ML regression — with an interactive Streamlit dashboard**
+
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-Boosting-189C1A?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+
+</div>
 
 ---
 
-## 👥 Group Members
-| Name | Task |
-|------|------|
-| Person 1 | Data scraping (Basketball-Reference + salary data) |
-| Person 2 | Feature engineering + ML model training |
-| Person 3 | Streamlit dashboard + report + video |
+## What It Does
+
+Enter any NBA player's per-game statistics and the system predicts their market salary in real time using a trained ML regression model. The interactive Streamlit dashboard lets you adjust sliders for points, assists, rebounds, and more — and instantly see the predicted salary tier.
+
+> **Best model:** Ridge Regression — **RMSE: $2.50M** on 2022–2024 NBA season data
 
 ---
 
-## 📁 Project Structure
+## Results
+
+| Model | RMSE (lower = better) |
+|-------|----------------------|
+| **Ridge Regression** ✅ | **$2.50M** |
+| Random Forest | $2.98M |
+| XGBoost | $2.87M |
+| SVR | $3.35M |
+
+**Key finding:** PTS (points per game) dominates salary prediction — importance score of 0.85+ in Random Forest. Secondary factors: AST, PER, TRB.
+
+---
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| 4-model comparison | Ridge Regression, Random Forest, XGBoost, SVR — auto-selects best |
+| Real web scraping | Data scraped from Basketball-Reference.com (2022–2024 seasons) |
+| Feature engineering | PER, TS%, GS ratio, age-prime factor, pts/min |
+| Interactive dashboard | Streamlit sliders for real-time prediction |
+| Salary tier classification | Superstar / All-Star / Starter / Rotation / Minimum |
+| Visualization | Model comparison, actual vs predicted, feature importance, salary distribution |
+
+---
+
+## ML Pipeline
+
 ```
-nba_salary_predictor/
+Basketball-Reference.com
+        │
+        ▼
+Web Scraping (BeautifulSoup + requests)
+Per-game stats + salaries for 2022, 2023, 2024 seasons
+        │
+        ▼
+Feature Engineering
+  Raw: PTS, AST, TRB, STL, BLK, TOV, FG%, 3P%, FT%, Age, G, MP
+  Engineered: PER, TS%, GS_ratio, age_prime (|age-27|), pts_per_min
+  Encoded: Position (PG=0, SG=1, SF=2, PF=3, C=4)
+        │
+        ▼
+Train 4 Regression Models (80/20 split, stratified)
+StandardScaler applied for Ridge + SVR
+        │
+        ▼
+Auto-select best model by RMSE
+Save model.pkl + scaler.pkl + features.pkl
+        │
+        ▼
+Streamlit Dashboard
+  → Sidebar sliders for player stats input
+  → Real-time salary prediction
+  → Salary tier label
+  → Performance visualizations
+```
+
+---
+
+## Features Used
+
+**Raw stats:** PTS, AST, TRB, STL, BLK, TOV, FG%, 3P%, FT%, Age, G, GS, MP
+
+**Engineered features:**
+| Feature | Formula | Purpose |
+|---------|---------|---------|
+| PER | (PTS + TRB + AST + STL + BLK - TOV) / MP | Overall efficiency |
+| TS% | PTS / (2 × estimated possessions) | True shooting efficiency |
+| GS_ratio | GS / G | Starter reliability |
+| age_prime | \|Age - 27\| | Distance from peak age |
+| pts_per_min | PTS / MP | Scoring efficiency per minute |
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Data Collection | requests + BeautifulSoup (web scraping) |
+| Data Processing | Pandas, NumPy |
+| ML Models | Scikit-learn (Ridge, Random Forest, SVR), XGBoost |
+| Visualization | Matplotlib, Seaborn |
+| Dashboard | Streamlit |
+| Model Storage | Joblib |
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/ixsntg012-lab/nba-salary-predictor.git
+cd nba-salary-predictor
+pip install -r requirements.txt
+```
+
+---
+
+## Usage
+
+```bash
+# Step 1 — Scrape data
+python scrape_data.py
+
+# Step 2 — Train models
+python models/train_models.py
+
+# Step 3 — Launch dashboard
+streamlit run dashboard/app.py
+```
+
+---
+
+## Project Structure
+
+```
+nba-salary-predictor/
 ├── data/
-│   ├── scrape_data.py       # Person 1 — scrape stats + salaries
-│   └── nba_data.csv         # generated after scraping
+│   ├── scrape_data.py       ← Web scraping (Basketball-Reference)
+│   └── nba_data.csv         ← Generated after scraping
 ├── models/
-│   ├── train_models.py      # Person 2 — train & compare 4 models
-│   ├── best_model.pkl       # saved after training
-│   ├── scaler.pkl
-│   └── features.pkl
+│   ├── train_models.py      ← Train + compare 4 models
+│   ├── best_model.pkl       ← Saved best model
+│   ├── scaler.pkl           ← Saved StandardScaler
+│   └── features.pkl         ← Feature list
 ├── dashboard/
-│   └── app.py               # Person 3 — Streamlit UI
-├── plots/                   # auto-generated after training
+│   └── app.py               ← Streamlit dashboard
+├── plots/                   ← Auto-generated visualizations
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup & Run
+## Limitations & Future Work
 
-### 1. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Scrape data (Person 1)
-```bash
-cd data
-python scrape_data.py
-```
-> This scrapes NBA stats + salaries from Basketball-Reference for 2022–2024 seasons.  
-> If scraping fails, a sample dataset is auto-generated for development.
-
-### 3. Train models (Person 2)
-```bash
-python models/train_models.py
-```
-> Trains Ridge Regression, Random Forest, XGBoost, SVR  
-> Saves best model + generates plots in `/plots`
-
-### 4. Launch dashboard (Person 3)
-```bash
-streamlit run dashboard/app.py
-```
+- Salary prediction is inherently noisy — player market value depends on team needs, contract years, and negotiation, not just stats
+- Model trained on 3 seasons (2022–2024) — more historical data would improve generalization
+- Future: add injury history, contract years remaining, and team salary cap space as features
+- Future: deploy on Streamlit Cloud for public access
 
 ---
 
-## 🤖 ML Models Compared
-| Model | Type |
-|-------|------|
-| Ridge Regression | Linear (baseline) |
-| Random Forest | Ensemble |
-| XGBoost | Gradient Boosting |
-| SVR | Support Vector Machine |
+## Data Source
 
-**Metric:** RMSE (Root Mean Squared Error) on 20% test split  
-**Best model** is automatically saved and used in the dashboard.
+Stats and salary data scraped from [Basketball-Reference.com](https://www.basketball-reference.com) — 2022, 2023, 2024 NBA seasons.
 
 ---
 
-## 📊 Features Used
-- Per-game stats: PTS, AST, TRB, STL, BLK, TOV
-- Shooting: FG%, 3P%, FT%
-- Engineered: PER (efficiency), TS%, pts/min, GS ratio, age-prime factor
-- Position encoding
+## Author
+
+**Swetha Kiran Veernapu**
+MS Computer Science | CAP 5937 Final Project
 
 ---
 
-## 📋 Evaluation
-- RMSE, MAE, R² on held-out test set (2022–2024 seasons)
-- Cross-validation for model selection
-- Feature importance plots (Random Forest)
-- Actual vs Predicted scatter plot
+## License
 
----
-
-## 🔗 Links
-- **Code:** [GitHub Repo Link Here]
-- **Data:** Basketball-Reference.com (scraped)
-- **Video:** [YouTube/Drive Link Here]
-- **Dashboard Demo:** [Streamlit Share Link Here]
-
----
-
-## 📚 References
-- Basketball-Reference.com
-- Scikit-learn documentation
-- XGBoost documentation
-- Streamlit documentation
+MIT License
