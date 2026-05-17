@@ -10,6 +10,8 @@
 ![XGBoost](https://img.shields.io/badge/XGBoost-Boosting-189C1A?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
+### 🚀 [Live Demo → swetha-nba-salary.streamlit.app](https://swetha-nba-salary.streamlit.app)
+
 </div>
 
 ---
@@ -26,7 +28,7 @@ Enter any NBA player's per-game statistics and the system predicts their market 
 
 | Model | RMSE (lower = better) |
 |-------|----------------------|
-| **Ridge Regression** ✅ | **$2.50M** |
+| **Ridge Regression ✅** | **$2.50M** |
 | Random Forest | $2.98M |
 | XGBoost | $2.87M |
 | SVR | $3.35M |
@@ -48,7 +50,7 @@ Enter any NBA player's per-game statistics and the system predicts their market 
 
 ---
 
-## ML Pipeline
+## How It Works
 
 ```
 Basketball-Reference.com
@@ -64,19 +66,13 @@ Feature Engineering
   Encoded: Position (PG=0, SG=1, SF=2, PF=3, C=4)
         │
         ▼
-Train 4 Regression Models (80/20 split, stratified)
-StandardScaler applied for Ridge + SVR
+Train 4 Regression Models (80/20 split)
         │
         ▼
-Auto-select best model by RMSE
-Save model.pkl + scaler.pkl + features.pkl
+Auto-select best model by RMSE → Save model.pkl
         │
         ▼
-Streamlit Dashboard
-  → Sidebar sliders for player stats input
-  → Real-time salary prediction
-  → Salary tier label
-  → Performance visualizations
+Streamlit Dashboard → Real-time salary prediction
 ```
 
 ---
@@ -86,6 +82,7 @@ Streamlit Dashboard
 **Raw stats:** PTS, AST, TRB, STL, BLK, TOV, FG%, 3P%, FT%, Age, G, GS, MP
 
 **Engineered features:**
+
 | Feature | Formula | Purpose |
 |---------|---------|---------|
 | PER | (PTS + TRB + AST + STL + BLK - TOV) / MP | Overall efficiency |
@@ -132,6 +129,8 @@ python models/train_models.py
 streamlit run dashboard/app.py
 ```
 
+Or visit the **[Live Demo](https://swetha-nba-salary.streamlit.app)** directly!
+
 ---
 
 ## Project Structure
@@ -157,10 +156,10 @@ nba-salary-predictor/
 
 ## Limitations & Future Work
 
-- Salary prediction is inherently noisy — player market value depends on team needs, contract years, and negotiation, not just stats
+- Salary prediction is inherently noisy — market value depends on team needs, contract years, and negotiation
 - Model trained on 3 seasons (2022–2024) — more historical data would improve generalization
-- Future: add injury history, contract years remaining, and team salary cap space as features
-- Future: deploy on Streamlit Cloud for public access
+- Future: add injury history, contract years remaining, team salary cap space as features
+- Future: deploy on Streamlit Cloud for public access ✅ Done!
 
 ---
 
@@ -173,7 +172,7 @@ Stats and salary data scraped from [Basketball-Reference.com](https://www.basket
 ## Author
 
 **Swetha Kiran Veernapu**
-MS Computer Science | CAP 5937 Final Project
+MS Computer Science | UCF
 
 ---
 
